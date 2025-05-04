@@ -17,6 +17,7 @@ def make_plot(data, x, y, title, x_label, y_label, kind='line', color=None):
     
     fig.update_layout(xaxis_title=x_label, yaxis_title=y_label)
     fig.show()
+    fig.write_html(f"charts/{title}.html")
 
 
 
@@ -50,3 +51,6 @@ def make_plot_2y(data, x, y, y2, title, x_label, y_label, kind='line', color=Non
             fig.update_traces(marker_color=color)
         
         fig.show()
+
+        #Save file in the charts folder in html format  
+        fig.write_html(f"charts/{title}.html")
