@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
 import plotly.express as px
-
+from scipy.optimize import curve_fit
+import numpy as np
 
 def make_plot(data, x, y, title, x_label, y_label, kind='line', color=None):
     if kind == 'line':
@@ -54,3 +55,34 @@ def make_plot_2y(data, x, y, y2, title, x_label, y_label, kind='line', color=Non
 
         #Save file in the charts folder in html format  
         fig.write_html(f"charts/{title}.html")
+
+
+#Decline curve function
+
+
+
+# Function to fit the decline curve
+def fit_decline_curve(data, time_col, rate_col, auto = True, qi = None, Di = None):
+    # Extract time and rate data
+    t = data[time_col]
+    q = data[rate_col]
+
+    # Define the exponential decline function
+    def exponential_decline(t, qi, Di):
+        return qi * np.exp(-Di * t)
+    
+    # Fit the exponential decline curve
+    popt, _ = curve_fit(exponential_decline, t, q, maxfev=10000)
+    
+    if auto == True:
+        # Extract fitted parameters
+        qi, Di = popt
+    else: #Define the parameters manually
+        qi = 6000
+        Di = 0.008
+    
+    # Generate fitted values
+    q_fit = exponential_decline(t, qi, Di)
+    
+    # Return fitted parameters and values
+    return qi, Di, q_fit
