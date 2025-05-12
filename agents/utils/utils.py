@@ -86,3 +86,21 @@ def fit_decline_curve(data, time_col, rate_col, auto = True, qi = None, Di = Non
     
     # Return fitted parameters and values
     return qi, Di, q_fit
+
+#Clean the dataset by removing outliers in oil rate iteratively
+
+def remove_outliers(df_subset, threshold=0.4):
+    """
+    Remove outliers from the dataset based on the specified threshold.
+    """
+    df_subset = df_subset.copy()
+    clean_rate = [df_subset['WT Oil'].iloc[0]]
+    index_list = [df_subset.index[0]]
+    
+    for index, row in df_subset.iterrows():
+        diff = np.log(row['WT Oil']/clean_rate[-1])
+        if diff > -0.4:
+            clean_rate.append(row['WT Oil'])
+            index_list.append(index)
+
+    return df_subset, index_list

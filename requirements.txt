@@ -2,3 +2,4 @@ scikit-learn
 pandas
 statsmodels
 plotly
+openpyxl
