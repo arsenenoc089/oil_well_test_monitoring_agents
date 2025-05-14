@@ -2,6 +2,50 @@ import plotly.graph_objects as go
 import plotly.express as px
 from scipy.optimize import curve_fit
 import numpy as np
+from loguru import logger
+
+
+#####################################
+#Load data function
+def load_transform_welltest_data(file_path, well_name='cheetah-20'):
+    """
+    Load well test data from an excel sheet
+    
+    """
+    #Load data - cheetah-20 as example
+    logger.info(f"Loading data from {file_path} for well {well_name}")
+    df = pd.read_excel(filepath, sheet_name=well_name)
+    logger.info(f"Done loading data from {file_path} for well {well_name}")
+
+    #Select key columns
+    df = df[['Date', 'Well Name', 'WT LIQ', 'WT Oil', 'WT THP', 'WT WCT', 'Z1 BHP',
+       'Z2 BHP', 'Z3 BHP', 'Delta Liquid', 'Delta Oil', 'Delta THP',
+       'Delta WCT', 'Delta Z1 BHP', 'Delta Z2 BHP', 'Delta Z3BHP',
+       'Decline Curve', 'Zonal Configuration', 'Engineer Interp',
+       'Engineer Action', 'Notification']].copy()
+    
+    df_subset.dropna(inplace = True)
+
+    # Generate the log of changes
+    # Generate the mean value of the BHP across the zones
+    logger.info("Generating mean BHP and log differences")
+    df['mean_bhp'] =  df[['Z1 BHP', 'Z2 BHP', 'Z3 BHP']].mean(axis=1)
+    df['log_diff_z1bhp_meanbhp'] = np.log(df['Z1 BHP'] / df['mean_bhp'])
+    df['log_diff_z2bhp_meanbhp'] = np.log(df['Z2 BHP'] / df['mean_bhp'])
+    df['log_diff_z3bhp_meanbhp'] = np.log(df['Z3 BHP'] / df['mean_bhp'])
+
+    # Generate the log of changes of other well test parameters
+    df['log_diff_oil'] = np.log(df['WT Oil'] / df['WT Oil'].shift(1))
+    df['log_diff_liq'] = np.log(df['WT LIQ'] / df['WT LIQ'].shift(1))
+    df['log_diff_thp'] = np.log(df['WT THP'] / df['WT THP'].shift(1))
+    df['log_diff_wct'] = np.log(df['WT WCT'] / df['WT WCT'].shift(1))
+    logger.info("Done generating mean BHP and log differences")
+
+    return df
+
+
+
+
 
 def make_plot(data, x, y, title, x_label, y_label, kind='line', color=None):
     if kind == 'line':
