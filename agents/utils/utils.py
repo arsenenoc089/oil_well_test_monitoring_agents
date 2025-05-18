@@ -4,11 +4,13 @@ from scipy.optimize import curve_fit
 import numpy as np
 import pandas as pd
 from loguru import logger
+import streamlit as st
 
 
 #####################################
 #Load data function
 #####################################
+@st.cache_data()
 def load_transform_welltest_data(file_path, well_name='cheetah-20'):
     """
     Load well test data from an excel sheet

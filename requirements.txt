@@ -5,3 +5,6 @@ plotly
 openpyxl
 openai-agents
 loguru
+streamlit-shadcn-ui
+streamlit-aggrid
+streamlit
