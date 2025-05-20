@@ -46,5 +46,5 @@ class WellTestInterpretation(BaseModel):
     """A short 2-3 sentence of your findings after analysing the data looking for anomalies"""
 
 class AnomalyInsights(BaseModel):
-    short_summary: str
+    Short_summary: str
     """A short 2-3 sentence of your findings after analysing the data looking for anomalies"""

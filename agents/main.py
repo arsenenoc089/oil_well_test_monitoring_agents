@@ -8,8 +8,11 @@ from tools.output import WellTestContext, ZonalTestMemory, WellTestInterpretatio
 from tools.tools import save_test_memory
 from dotenv import load_dotenv
 import streamlit as st
-from st_aggrid import AgGrid
+from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
+import streamlit_shadcn_ui as ui
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 
 st.set_page_config(layout="wide")
 
@@ -48,8 +51,7 @@ async def main():
     with st.sidebar:
         st.title("WellWatch")
         st.subheader("Oil Well Test Monitoring with Agentic AI")
-        st.write("This is a demo of Colab work on Agentic AI for oil well test monitoring.")
-        st.write("The platform uses a combination of statistics and RE expertise to enable the AI agents to detect anomalies in well test data and provide insights.")
+
 
     logger.info("Starting to load data")
     df = utils.load_transform_welltest_data('data/RMO_Agentic AI_train_test.xlsx')
@@ -59,12 +61,15 @@ async def main():
             'log_diff_liq', 'log_diff_thp', 'log_diff_wct']].copy()
     
     df['Date'] = df['Date'].astype(str)
-
     #Dates list
     dates = df['Date'].unique().tolist()
     dates.sort()
-    #Select date
-    selected_date = st.sidebar.selectbox("Select a well test date", dates)
+
+    with st.sidebar:
+        st.divider()
+        st.markdown('Select a well test date below:')
+        selected_date = ui.select(options=dates)
+
     
     if selected_date:
         #select the data up until the selected date
@@ -76,39 +81,103 @@ async def main():
         df_aggrid['Date'] = pd.to_datetime(df_aggrid['Date'])
         df_aggrid = df_aggrid[['Date', 'WellName', 'WTLIQ', 'WTOil', 'WTTHP', 'WTWCT', 'Z1BHP',
             'Z2BHP', 'Z3BHP']]
-        grid_return = AgGrid(df_aggrid, editable=True, width = 800, height=300, fit_columns_on_grid_load=True)
 
-    
-    df = df.iloc[13:]
+        value = ui.tabs(options=['Well test chart', 'Well test datatable'], default_value='PyGWalker', key="kanaries")
 
-    df_iterator = df.iterrows()
-    next(df_iterator)
-    idx, serie = next(df_iterator)
-    df = serie.to_dict()
+        if value == "Well test chart":
+            #Charts
+            # Option 1: Single plot with all lines
+            fig = go.Figure()
 
-    #Define the context
-    context = CONTEXT_PROMPT
+            # Add each column as a separate line
+            for column in ['WTLIQ', 'WTOil', 'WTWCT', 'Z1BHP','Z2BHP', 'Z3BHP']:  # Skip the Date column
+                fig.add_trace(go.Scatter(
+                    x=df['Date'],
+                    y=df[column],
+                    mode='lines',
+                    name=column
+                ))
 
-    well_test_input = WellTestContext(**df)
-    logger.info(f"well test input {well_test_input}")
+            fig.update_layout(
+                title="Well test data: WT OIL, WT WCT, WT Liq, Z1 BHP, Z2 BHP & Z3 BHP",
+                xaxis_title="Date",
+                yaxis_title="Value",
+                legend_title="Columns",
+                height=500
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+        elif value == "Well test datatable":
+            # Build grid options
+            gb = GridOptionsBuilder.from_dataframe(df_aggrid)
+
+            # Cell styling for the 'Value' column based on threshold
+            cellstyle_jscode = JsCode("""
+            function(params) {
+                if (params.value < 5000) {
+                    return {
+                        'color': 'white',
+                        'backgroundColor': 'salmon'
+                    }
+                } else {
+                    return {
+                        'color': 'black',
+                        'backgroundColor': 'white'
+                    }
+                }
+            };
+            """)
+
+            # Apply conditional formatting to multiple columns
+            columns_to_style = ['Z1BHP','Z2BHP', 'Z3BHP']
+            for col in columns_to_style:
+                gb.configure_column(col, cellStyle=cellstyle_jscode)
+            # Build the grid options
+            grid_options = gb.build()
+            grid_return = AgGrid(df_aggrid, gridOptions=grid_options,editable=True, allow_unsafe_jscode=True, width = 800, height=300, fit_columns_on_grid_load=True)
+
+
 
     # Ensure the entire workflow is a single trace
-    button = st.button("Run well test AI Agents workflow")
-    if button:
+    agentic_ai_button = ui.button("Run AI Agents", key="agentic_ai")
+    if agentic_ai_button:
         # Run the agents in a deterministic story flow
+        df = df.tail(1)
+        df_iterator = df.iterrows()
+        idx, serie = next(df_iterator)
+        df = serie.to_dict()
+
+        #Define the context
+        context = CONTEXT_PROMPT
+
+        well_test_input = WellTestContext(**df)
+        logger.info(f"well test input {well_test_input}")
         with trace("Deterministic story flow"):
 
             # Run the anomaly detection agent
             result_anomaly = await Runner.run(anomaly_detection_agent, input=f' Here are the well test data {well_test_input.model_dump()}' , context=context)
-            print(result_anomaly.final_output)
-
             # Run the memory saver agent
             result_memory = await Runner.run(MEMORY_SAVER_AGENT, input=f' Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output}' , context=context)
-            print(result_memory.final_output)
-
             # Run the interpretator agent
             result_interpretator = await Runner.run(INTERPRETATOR_AGENT, input=f' Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output}' , context=context)
-            print(result_interpretator.final_output)
+
+            
+            st.write("Agentic AI workflow has been triggered - See the results in the card below")
+            with ui.card(key="card1"):
+                ui.element("h3", children=["Anomaly detector agent:"], className="font-bold ")
+                with ui.element("div", className="flex justify-between bg-blue-300 rounded-sm"):
+                    ui.element("span", children=[str(result_anomaly.final_output.Short_summary)], className="font-Medium")
+            
+            with ui.card(key="card2"):
+                ui.element("h3", children=["Insights Interpretation agent:"], className="font-bold ")
+                with ui.element("div", className="flex justify-between bg-blue-300 rounded-sm"):
+                    ui.element("span", children=[str(result_interpretator.final_output)], className="font-Medium")
+            
+
+
+
+    
+
 
 if __name__ == "__main__":
     asyncio.run(main())
