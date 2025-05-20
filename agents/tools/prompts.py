@@ -16,7 +16,7 @@ CONTEXT_PROMPT = (" Our wells are horizontal with completion made of zones which
                     "For example zone1: WCT 20%, Zone 2,WCT 75%, Zone 3: WCT 35%. A decision can be made to shut/close zone 2 temporarily."
                     "--------"
                     "Another activity known as acid stimulation can be conducted to improve the flow of oil and water by default in the reservoir region near"
-                    " the wellbore. This acid usually dissolves deposits or reservoir material thereby increasing permeability. This usually leads to a sudden increase"
+                    " the wellbore. This acid usually dissolves deposits iinside the well or near the wellbore area in the reservoir. thereby increasing permeability. This usually leads to a sudden increase"
                     " in oil rate that also decreases fast but overall a higher oil rate in the short term (2 months+). This is usally followed by an increase in BHP and"
                     " a slight increase or decrease in WCT (water cut).")
 
