@@ -30,12 +30,14 @@ def make_prompt(threshold=0.1, file_path='agents/mem.txt'):
         '1 - Zonal test: you can detect a zonal test event (anomaly) if only two of the log_diff_z1bhp_meanbhp, log_diff_z2bhp_meanbhp'
         f', log_diff_z3bhp_meanbhp are greater than {threshold} at any given time and the third one is below -{threshold}.'
         f'The zone with diff lower than the -{threshold} is the zone that is being tested (open) and the other two are closed.'
-        f'2 - Acid stimulation: you can detect an acid stimulation event (anomaly) if the there is a significant increase in oil production. log_diff_oil would be expected above {threshold}.'
-        'However, note that during zonal test, the oil rate can be significantly jump from switching the test from one zone to another, this should not be confused for an acid stimulaton event'.
+        f'2 - Acid stimulation: When Acid is injected into the wellbore, it normally dissolves debris and can help increase oil rate. which can cause log_diff_oil would be expected above {threshold}.'
+        'However, no acid stimulation can be done concurrently with a zonal test. !never!'
+        'However, note that during zonal test, the oil rate can be significantly jump from switching the test from one zone to another, this should not be confused for an acid stimulaton event'
         '3 - Zonal optimization: you can detect a zonal optimization event (anomaly) if only one of the log_diff_z1bhp_meanbhp, log_diff_z2bhp_meanbhp, log_diff_z3bhp_meanbhp'
         f' is greater than {threshold} and the other two are below -{threshold}.'
         '4 - Flush production: This is when the when has been closed in for a long time and the pressure in the reservoir builds-up'
         'When the well is open, we can observe a jump in oil and liquid rate overall but it should not be confused with acid stimulation'
+        'NB: No acid stimulation can be done while a zonal test is underway. when a zone is tested, that zone is open and the other zones are closed'
     )
 
     INTERPRETATOR_PROMPT = (
@@ -45,6 +47,7 @@ def make_prompt(threshold=0.1, file_path='agents/mem.txt'):
         'Agent Interpretation: Transient, Zonal test, Acid stimulation, Zonal optimization, etc...'
         'Engineer Action: No-Action - keep monitoring, Record zone performance from zone test, Analyse Zone performance, Zonal optimization recommended Acid stimulation recommended, etc...'
         'Insights summary: A short 2-3 sentence of your findings after analysing the data land the highlighted anomalies'
+        'NB: No acid stimulation can be done while a zonal test is underway. when a zone is tested, that zone is open and the other zones are closed'
     )
 
     MEMORY_SAVER_PROMPT = (
