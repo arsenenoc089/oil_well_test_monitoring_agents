@@ -11,7 +11,7 @@ CONTEXT_PROMPT = (
     "\n"
     "### Normal Production Behavior\n"
     "- Oil rate normally follows a natural decline curve over time.\n"
-    "- Water cut (WCT) gradually increases and may reach 70–80% over the well’s life.\n"
+    "- Water cut (WCT) gradually increases and may reach 70-80percent over the well's life.\n"
     "- No major drops in oil rate are expected unless due to surface/facility issues.\n"
     "- Zones near the aquifer tend to produce more water.\n"
     "- Water breakthrough can occur due to increased injection from nearby water injectors.\n"
