@@ -163,6 +163,12 @@ async def main():
             result_anomaly = await Runner.run(anomaly_detection_agent, input=f' Here are the well test data {well_test_input.model_dump()}' , context=context)
             logger.info(f"The anomaly detector agent has completed its work...")
 
+            st.write("Agentic AI workflow has been triggered - See the results in the card below")
+            with ui.card(key="card1"):
+                ui.element("h3", children=["Anomaly detector agent:"], className="font-bold ")
+                with ui.element("div", className="flex justify-between bg-blue-200 rounded-sm "):
+                    ui.element("span", children=[str(result_anomaly.final_output.Short_summary)], className="font-Medium")
+
             # Run the memory saver agent
             logger.info(f"Now the memory savor agent is at work...")
             result_memory = await Runner.run(MEMORY_SAVER_AGENT, input=f' Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output}' , context=context)
@@ -173,15 +179,9 @@ async def main():
             result_interpretator = await Runner.run(INTERPRETATOR_AGENT, input=f' Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output}' , context=context)
             logger.info(f"The insights interpreter agent has completed its work...")
             
-            st.write("Agentic AI workflow has been triggered - See the results in the card below")
-            with ui.card(key="card1"):
-                ui.element("h3", children=["Anomaly detector agent:"], className="font-bold ")
-                with ui.element("div", className="flex justify-between bg-blue-300 rounded-sm"):
-                    ui.element("span", children=[str(result_anomaly.final_output.Short_summary)], className="font-Medium")
-            
             with ui.card(key="card2"):
                 ui.element("h3", children=["Insights Interpretation agent:"], className="font-bold ")
-                with ui.element("div", className="flex justify-between bg-blue-300 rounded-sm"):
+                with ui.element("div", className="flex justify-between bg-blue-200 rounded-sm"):
                     ui.element("span", children=[str(result_interpretator.final_output)], className="font-Medium")
             
             with open(mem_file_path, 'r') as f:

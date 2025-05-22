@@ -1,6 +1,7 @@
 from agents import function_tool
 from tools.output import WellTestContext, ZonalTestMemory, WellTestInterpretation, AnomalyInsights
 from pathlib import Path
+from loguru import logger
 
 this_dir = Path(__file__).parent
 file_path = this_dir.parent / "mem.txt"
@@ -20,7 +21,7 @@ def save_test_memory(welldata: WellTestContext, file_path: str,
             file_path: The path to the file where the data will be saved.
     """
 
-    file_path =  'agents/mem.txt'
+    #file_path =  'agents/mem.txt'
     logger.info(f"Saving well test data in memory")
     fields = [
         welldata.Date,
