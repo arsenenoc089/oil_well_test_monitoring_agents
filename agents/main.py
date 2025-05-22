@@ -13,14 +13,18 @@ import streamlit_shadcn_ui as ui
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import os
 
+
+base_path = os.path.dirname(__file__)
+mem_file_path = os.path.join(base_path, "mem.txt")
 st.set_page_config(layout="wide")
 
 #Load environment variables
 load_dotenv()
 
 #Prompts
-ANOMALY_DETECTOR_PROMPT, MEMORY_SAVER_PROMPT, INTERPRETATOR_PROMPT = make_prompt(threshold=0.1)
+ANOMALY_DETECTOR_PROMPT, MEMORY_SAVER_PROMPT, INTERPRETATOR_PROMPT = make_prompt(threshold=0.1, file_path = mem_file_path)
 
 
 # Agent team
@@ -155,12 +159,19 @@ async def main():
         with trace("Deterministic story flow"):
 
             # Run the anomaly detection agent
+            logger.info(f"The anomaly detector agent is at work...")
             result_anomaly = await Runner.run(anomaly_detection_agent, input=f' Here are the well test data {well_test_input.model_dump()}' , context=context)
-            # Run the memory saver agent
-            result_memory = await Runner.run(MEMORY_SAVER_AGENT, input=f' Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output}' , context=context)
-            # Run the interpretator agent
-            result_interpretator = await Runner.run(INTERPRETATOR_AGENT, input=f' Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output}' , context=context)
+            logger.info(f"The anomaly detector agent has completed its work...")
 
+            # Run the memory saver agent
+            logger.info(f"Now the memory savor agent is at work...")
+            result_memory = await Runner.run(MEMORY_SAVER_AGENT, input=f' Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output}' , context=context)
+            logger.info(f"The memory savor agent has completed its work...")
+
+            # Run the interpretator agent
+            logger.info(f"Now the insights interpreter agent is at work...")
+            result_interpretator = await Runner.run(INTERPRETATOR_AGENT, input=f' Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output}' , context=context)
+            logger.info(f"The insights interpreter agent has completed its work...")
             
             st.write("Agentic AI workflow has been triggered - See the results in the card below")
             with ui.card(key="card1"):
@@ -173,10 +184,11 @@ async def main():
                 with ui.element("div", className="flex justify-between bg-blue-300 rounded-sm"):
                     ui.element("span", children=[str(result_interpretator.final_output)], className="font-Medium")
             
-
-
-
-    
+            with open(mem_file_path, 'r') as f:
+                logger.info(f"This has been saved in the memory file: {f.read()}")
+            
+            
+  
 
 
 if __name__ == "__main__":

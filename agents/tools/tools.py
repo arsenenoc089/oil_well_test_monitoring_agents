@@ -1,5 +1,9 @@
 from agents import function_tool
 from tools.output import WellTestContext, ZonalTestMemory, WellTestInterpretation, AnomalyInsights
+from pathlib import Path
+
+this_dir = Path(__file__).parent
+file_path = this_dir.parent / "mem.txt"
 
 # Tools
 @function_tool
