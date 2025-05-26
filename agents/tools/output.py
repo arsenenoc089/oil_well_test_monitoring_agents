@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Literal
 
 #Agents output types
 class WellTestContext(BaseModel):
@@ -29,9 +30,9 @@ class ZonalTestMemory(BaseModel):
     WTOil: float
     WTTHP: float
     WTWCT: float
-    Z1Status: str
-    Z2Status: str
-    Z3Status: str
+    Z1Status: Literal["Open", "Closed"]
+    Z2Status: Literal["Open", "Closed"]
+    Z3Status: Literal["Open", "Closed"]
     Z1BHP: float
     Z2BHP: float
     Z3BHP: float
