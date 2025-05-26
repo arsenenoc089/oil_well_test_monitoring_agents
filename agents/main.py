@@ -81,7 +81,6 @@ async def main():
         st.markdown('Select a well test date below:')
         selected_date = ui.select(options=dates)
 
-    
     if selected_date:
         #select the data up until the selected date
         logger.info(f"Filtering data for date {selected_date}")
@@ -148,9 +147,15 @@ async def main():
             grid_return = AgGrid(df_aggrid, gridOptions=grid_options,editable=True, allow_unsafe_jscode=True, width = 800, height=300, fit_columns_on_grid_load=True)
 
 
-
     # Ensure the entire workflow is a single trace
     agentic_ai_button = ui.button("Run AI Agents", key="agentic_ai")
+
+    #add image of agentic flow
+    image_path = os.path.join(base_path, "agentic_ai.png")
+    st.image(image_path)
+    st.divider()
+
+
     if agentic_ai_button:
         # Run the agents in a deterministic story flow
         df = df.tail(1)
