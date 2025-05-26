@@ -166,7 +166,7 @@ async def main():
             st.write("Agentic AI workflow has been triggered - See the results in the card below")
             with ui.card(key="card1"):
                 ui.element("h3", children=["Anomaly detector agent:"], className="font-bold ")
-                with ui.element("div", className="flex justify-between bg-blue-200 rounded-sm "):
+                with ui.element("div", className="flex justify-between bg-stone-200 rounded-sm "):
                     ui.element("span", children=[str(result_anomaly.final_output.Short_summary)], className="font-Medium")
 
             # Run the memory saver agent
@@ -181,7 +181,7 @@ async def main():
             
             with ui.card(key="card2"):
                 ui.element("h3", children=["Insights Interpretation agent:"], className="font-bold ")
-                with ui.element("div", className="flex justify-between bg-blue-200 rounded-sm"):
+                with ui.element("div", className="flex justify-between bg-stone-200 rounded-sm"):
                     ui.element("span", children=[str(result_interpretator.final_output)], className="font-Medium")
             
             with open(mem_file_path, 'r') as f:
