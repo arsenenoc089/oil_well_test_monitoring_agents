@@ -1,6 +1,7 @@
 import asyncio
 from pydantic import BaseModel
 from agents import Agent, Runner, trace
+from openai import OpenAI
 from loguru import logger
 from utils import utils
 from tools.prompts import make_prompt, CONTEXT_PROMPT
@@ -21,7 +22,13 @@ mem_file_path = os.path.join(base_path, "mem.txt")
 st.set_page_config(layout="wide")
 
 #Load environment variables
-load_dotenv()
+try:
+    # Access nested values
+    openai_key = st.secrets["api_keys"]["openai"]
+    os.environ["OPENAI_API_KEY"] = openai_key
+except:
+    load_dotenv()
+
 
 #Prompts
 ANOMALY_DETECTOR_PROMPT, MEMORY_SAVER_PROMPT, INTERPRETATOR_PROMPT = make_prompt(threshold=0.1, file_path = mem_file_path)
