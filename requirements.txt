@@ -9,3 +9,4 @@ streamlit-shadcn-ui
 streamlit-aggrid
 streamlit
 openai
+agents

@@ -103,8 +103,29 @@ def make_prompt(threshold=0.1, file_path=file_path):
 
 
     INTERPRETATOR_PROMPT = (
-        'You will be given a well test data and a summary of analysis from an anomaly detector agent.'
-        'you will have to interpret the data and give a generate your findings/interpretation as an experience Reservoir Engineer would. you need to inform the below:'
+        'You will be given a well test data, a summary of analysis from an anomaly detector agent and maybe some memory log/data from recents well tests.'
+        "WCT: water Cut, BHP: Bottom Hole Pressure, THP: Tubing Head Pressure, WTLIQ: Well Test Liquid, WTOil: Well Test Oil, Z1BHP: Zone 1 BHP, Z2BHP: Zone 2 BHP, Z3BHP: Zone 3 BHP\n"
+        "you will have to interpret the data and give a generate your findings/interpretation as an experience Reservoir Engineer would. \n"
+        "### Zonal Test Interpretation\n"
+        "To conduct the zonal test interpretation, you will need to analyse the data past to you from the memory file and the anomaly detector agent. "
+        "You will have to look into the BHPs of the zones, the oil and water rates, and the WCTs. over the last test indicated as zonal test in the memory data \n"
+        "Explanation below:"
+        "- During a zonal test, one zone is open and the others are closed.\n"
+        "- The reservoir engineer should analyze the performance of each zone with respect to oil and water produced.\n"
+        "- The idea is to potentially optimize the zones based on their performance.\n"
+        "- A zone may be recommended to be shut if it performs poorly, e.g., very high WCT.\n"
+        "- Decisions depend on trade-offs: high WCT may be acceptable if the oil rate is still relatively significant.\n"
+        "- Example: Zone 1 (WCT 20%), Zone 2 (WCT 75%), Zone 3 (WCT 35%) → Zone 2 should be recommended to be shut.\n"
+        "- It is called Zonal Optimization\n"
+        "\n"
+        "Mock data - example of a zonal test:\n"
+        "Date, WellName, Anomaly, AnomalyType, WTLIQ, WTOil, WTTHP, WTWCT, Z1Status, Z2Status, Z3Status, Z1BHP, Z2BHP, Z3BHP\n"
+        "2024-08-20, well_1, True, Zonal Test, 1500.4609375, 1340, 100.704650878906, 5358.47778320312, Closed, Open, Open, 12970.0, 8150.0, 8990.0 \n"
+        "2024-08-22, well_1, True, Zonal Test, 3800.4609375, 2300, 102.704650878906, 3490.47778320312, Open, Closed, Open, 8002, 11046, 8990.0 \n"
+        "2024-04-23, well_1, True, Zonal Test, 5400.8052184965, 600, 98.8267896083869, 8943.08972718706, Open, Open, Closed, 7890, 8293, 12325.3 \n"
+        "You should recommend a zonal optimisation in this case to shut the zone with the highest WCT (Zone 3) and keep the other two zones open for the foreseeable future.\n"
+        "If the recent (last 2) well tests in the memory file is not a zonal test, then you should not recommend any zonal optimisation and just keep monitoring the well performance.\n"
+        'you need to inform the below:'
         'Zonal Configuration: Commingle Production, Z1 Open, Z2 Open, Z3 Open, Z1 & Z2 Open etc...'
         'Agent Interpretation: Transient, Zonal test, Acid stimulation, Zonal optimization, etc...'
         'Engineer Action: No-Action - keep monitoring, Record zone performance from zone test, Analyse Zone performance, Zonal optimization recommended Acid stimulation recommended, etc...'

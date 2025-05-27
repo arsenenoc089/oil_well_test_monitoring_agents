@@ -6,7 +6,7 @@ from loguru import logger
 from utils import utils
 from tools.prompts import make_prompt, CONTEXT_PROMPT
 from tools.output import WellTestContext, ZonalTestMemory, WellTestInterpretation, AnomalyInsights
-from tools.tools import save_test_memory
+from tools.tools import save_test_memory, load_well_memory_data
 from dotenv import load_dotenv
 import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
@@ -166,6 +166,15 @@ async def main():
         #Define the context
         context = CONTEXT_PROMPT
 
+        #load memory data\
+        try:
+            logger.info(f"Loading memory data from {mem_file_path}")
+            memory_data = load_well_memory_data(mem_file_path)
+            logger.info(f"Memory data loaded successfully")
+        except Exception as e:
+            logger.error(f"Error loading memory data: {e}")
+            memory_data = []
+
         well_test_input = WellTestContext(**df)
         logger.info(f"well test input {well_test_input}")
         with trace("Deterministic story flow"):
@@ -188,7 +197,8 @@ async def main():
 
             # Run the interpretator agent
             logger.info(f"Now the insights interpreter agent is at work...")
-            result_interpretator = await Runner.run(INTERPRETATOR_AGENT, input=f' Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output}' , context=context)
+            result_interpretator = await Runner.run(INTERPRETATOR_AGENT, 
+                                                    input=f'Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output} - Memory data {memory_data}', context=context)
             logger.info(f"The insights interpreter agent has completed its work...")
             
             with ui.card(key="card2"):
@@ -201,7 +211,5 @@ async def main():
             
             
   
-
-
 if __name__ == "__main__":
     asyncio.run(main())
