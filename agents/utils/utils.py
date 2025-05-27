@@ -52,6 +52,7 @@ def load_transform_welltest_data(file_path, well_name='cheetah-20'):
                         }, inplace=True)
     
     df.dropna(inplace = True)
+    df['WTWCT'] = df['WTWCT']/ 100  # Convert WCT from percentage to decimal
 
     # Generate the log of changes
     # Generate the mean value of the BHP across the zones
