@@ -104,7 +104,7 @@ def make_prompt(threshold=0.1, file_path=file_path):
 
     INTERPRETATOR_PROMPT = (
         'You will be given a well test data, a summary of analysis from an anomaly detector agent and maybe some memory log/data from recents well tests.'
-        "WCT: water Cut, BHP: Bottom Hole Pressure, THP: Tubing Head Pressure, WTLIQ: Well Test Liquid, WTOil: Well Test Oil, Z1BHP: Zone 1 BHP, Z2BHP: Zone 2 BHP, Z3BHP: Zone 3 BHP\n"
+        "WTWCT: water Cut (%), BHP: Bottom Hole Pressure, WTTHP: Tubing Head Pressure, WTLIQ: Well Test Liquid, WTOil: Well Test Oil, Z1BHP: Zone 1 BHP, Z2BHP: Zone 2 BHP, Z3BHP: Zone 3 BHP\n"
         "you will have to interpret the data and give a generate your findings/interpretation as an experience Reservoir Engineer would. \n"
         "### Zonal Test Interpretation\n"
         "To conduct the zonal test interpretation, you will need to analyse the data past to you from the memory file and the anomaly detector agent. "
