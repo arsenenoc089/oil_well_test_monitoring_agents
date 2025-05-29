@@ -198,13 +198,23 @@ async def main():
             # Run the interpretator agent
             logger.info(f"Now the insights interpreter agent is at work...")
             result_interpretator = await Runner.run(INTERPRETATOR_AGENT, 
-                                                    input=f'Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result is {result_anomaly.final_output} - Memory data {memory_data}', context=context)
+                                                    input=f'Here are the well test data {well_test_input.model_dump()} and this is what the anomaly analysis result for this well test is {result_anomaly.final_output} - The memory data has past welltest {memory_data}', context=context)
             logger.info(f"The insights interpreter agent has completed its work...")
             
             with ui.card(key="card2"):
                 ui.element("h3", children=["Insights Interpretation agent:"], className="font-bold ")
-                with ui.element("div", className="flex justify-between bg-stone-200 rounded-sm"):
-                    ui.element("span", children=[str(result_interpretator.final_output)], className="font-Medium")
+                with ui.element("div", className="flex bg-stone-200 rounded-sm"):
+                    ui.element("h4", children=["Zonal Config: "], className="font-semibold")
+                    ui.element("span", children=[str(result_interpretator.final_output.ZonalConfiguration)], className="font-Medium")
+                with ui.element("div", className="flex bg-stone-200 rounded-sm"):
+                    ui.element("h4", children=["Interpretation: "], className="font-semibold")
+                    ui.element("span", children=[str(result_interpretator.final_output.Interpretation)], className="font-Medium inline-block")
+                with ui.element("div", className="flex bg-stone-200 rounded-sm"):
+                    ui.element("h4", children=["EngineerAction: "], className="font-semibold")
+                    ui.element("span", children=[str(result_interpretator.final_output.EngineerAction)], className="font-Medium")
+                with ui.element("div", className="flex bg-stone-200 rounded-sm"):
+                    ui.element("h4", children=["InsightsSummary: "], className="font-semibold")
+                    ui.element("span", children=[str(result_interpretator.final_output.InsightsSummary)], className="font-Medium")
             
             with open(mem_file_path, 'r') as f:
                 logger.info(f"This has been saved in the memory file: {f.read()}")

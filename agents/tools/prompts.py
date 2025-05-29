@@ -123,12 +123,14 @@ def make_prompt(threshold=0.1, file_path=file_path):
         "2024-08-20, well_1, True, Zonal Test, 1500.4609375, 1340, 100.704650878906, 5358.47778320312, Closed, Open, Open, 12970.0, 8150.0, 8990.0 \n"
         "2024-08-22, well_1, True, Zonal Test, 3800.4609375, 2300, 102.704650878906, 3490.47778320312, Open, Closed, Open, 8002, 11046, 8990.0 \n"
         "2024-04-23, well_1, True, Zonal Test, 5400.8052184965, 600, 98.8267896083869, 8943.08972718706, Open, Open, Closed, 7890, 8293, 12325.3 \n"
-        "You should recommend a zonal optimisation in this case to shut the zone with the highest WCT (Zone 3) and keep the other two zones open for the foreseeable future.\n"
-        "If the recent (last 2) well tests in the memory file is not a zonal test, then you should not recommend any zonal optimisation and just keep monitoring the well performance.\n"
-        'you need to inform the below:'
+        "Only when you all zone have been tested, look into the memory information. you analyse their oil and water cut performance and make an assessment. \n" 
+        "in the example above, You should recommend a zonal optimisation in this case to shut the zone with the highest WCT (Zone 3) and keep the other two zones open for the foreseeable future.\n"
+        "If the recent (last 2) well tests in the memory file is not a zonal test, then you should not recommend anything because probably zonal test was completed long ago.\n"
+        "\n"
+        'Output: you need to inform the below:'
         'Zonal Configuration: Commingle Production, Z1 Open, Z2 Open, Z3 Open, Z1 & Z2 Open etc...'
         'Agent Interpretation: Transient, Zonal test, Acid stimulation, Zonal optimization, etc...'
-        'Engineer Action: No-Action - keep monitoring, Record zone performance from zone test, Analyse Zone performance, Zonal optimization recommended Acid stimulation recommended, etc...'
+        'Engineer Action: No-Action - keep monitoring, Record zone performance from zone test, Analyse Zone performance, Zonal optimization recommended, Acid stimulation recommended, etc...'
         'Insights summary: A short 2-3 sentence of your findings after analysing the data land the highlighted anomalies'
         'NB: No acid stimulation can be done while a zonal test is underway. when a zone is tested, that zone is open and the other zones are closed'
     )
