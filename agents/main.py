@@ -67,9 +67,10 @@ async def main():
     logger.info("Starting to load data")
     df = utils.load_transform_welltest_data('data/RMO_Agentic AI_train_test.xlsx')
     df = df[['Date', 'WellName', 'WTLIQ', 'WTOil', 'WTTHP', 'WTWCT', 'Z1BHP',
-            'Z2BHP', 'Z3BHP', 'mean_bhp', 'log_diff_z1bhp_meanbhp',
-            'log_diff_z2bhp_meanbhp', 'log_diff_z3bhp_meanbhp', 'log_diff_oil',
-            'log_diff_liq', 'log_diff_thp', 'log_diff_wct']].copy()
+            'Z2BHP', 'Z3BHP', 'mean_bhp', 'log_diff_oil',
+            'log_diff_liq', 'log_diff_thp', 'log_diff_wct', 'log_diff_z1bhp',
+            'log_diff_z2bhp', 'log_diff_z3bhp', 'zone1_status', 'zone2_status',
+            'zone3_status']].copy()
     
     df['Date'] = df['Date'].astype(str)
     #Dates list

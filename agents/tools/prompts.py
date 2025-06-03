@@ -65,31 +65,32 @@ def make_prompt(threshold=0.1, file_path=file_path):
     "**1. Zonal Test**\n"
     "- A zonal test is a short-term diagnostic test to evaluate individual zone performance.\n"
     "- Detection Rule:\n"
-    "     • pay careful attention to log_diff_zbhp_meanbhp of the zones: this is the natural logarithm of the bhp of a zone divided by the mean of the 3 zones' bhp \n"
-    f"    • Two of the log_diff_z1bhp_meanbhp, log_diff_z2bhp_meanbhp, log_diff_z3bhp_meanbhp must be **greater than +{threshold}**. which is two zones have their BHPs far above the mean BHP.\n"
-    f"    • Only one of them (the third one) must be **less than -{threshold}**\n"
-    f"    • The zone with the log_diff_zbhp_meanbhp (below -{threshold}) is **open and being tested**; the other two are **closed**.\n"
+    "     • Analysis the zone_status values. If only one zone is **open** and the others are **closed**, it is a zonal test.\n"
+    "    • The **Open** Zone is the one that is being tested and usually has a relatively **lower BHP** in comparison to other two zones.\n"
     "     • Do a final verification by checking the BHP values. The two zones with Largest BHP tend to be the ones that are closed.\n"
 
     "\n"
     "**2. Zonal Optimization**\n"
     "- A zonal optimization is a semi-permanent shut-off of a poorly performing zone.\n"
+    "- Important: Optimizing a Zone usually does not results in significant increase in oil rate, but is aimed at reducing water cut and improving overall well performance.\n"
     "- Detection Rule:\n"
-    f"    • Only **one** of the BHP log differences is **greater than +{threshold}**\n"
-    f"    • The **other two** must be **below -{threshold}**\n"
-    f"    • This means two zones are open and one is shut.\n"
-    f"    • Do a final verification by checking the BHP values. The (single) zone with Largest BHP tend to be the one that is closed/optimized against.\n"
+    "    • Check the **zone_status** values. If two zones are **Open** and one is **closed**, it is a zonal optimization.\n"
+    "    • This means two zones are open and one is shut. The shut zone is likely the one that has a relatively higher water to oil ratio (water cut).\n"
+    "    • Do a final verification by checking the BHP values. The (single) zone with Largest BHP tend to be the one that is closed/optimized against.\n"
     
     "**⚠️ Important Distinction**\n"
-    f"- If two BHP log differences are **below -{threshold}** and one is **above +{threshold}**, it is a **zonal optimization**, NOT a Zonal test.\n"
+    "- If only one zone is open, it is a zonal test while if only one zone is closed it is a **zonal optimization**\n"
     "\n"
     "**3. Acid Stimulation**\n"
     "- This is a treatment to improve flow by dissolving near-wellbore deposits.\n"
     "- Detection Rule:\n"
-    f"    • if the stimulation is successful, log_diff_oil will be **greater than +{threshold}** and maybe an increase in bhp as well. \n"
+    f"    • if the stimulation is successful, log_diff_oil will be **greater than +{threshold}** and maybe usually an increase in bhp as well. \n"
+    f"    • 'log_diff of the BHP of the zones being stimulated' will likely be **greater than +{threshold}**\n"
+    "     • Therefore if you observe those, know that it is likely an acid stimulation unless a zonal test is undergoing then you can disregard the acid stimulation hypothesis.\n"
     "- Additional Notes:\n"
     "    • Acid stimulations usually result in an oil rate jump that persists for weeks.\n"
-    "    • They may also cause a BHP increase and a small shift in WCT.\n"
+    "    • They may also cause a BHP increase and some shift in WCT.\n"
+    f"   • Only acid stimulation can cause a genuine significant increase in oil rate and BHP above the {threshold}, not zonal optimizations.\n"
     "\n"
     "**4. Flush Production**\n"
     "- This occurs when a well is reopened after being shut in, causing pressure build-up.\n"
@@ -114,6 +115,7 @@ def make_prompt(threshold=0.1, file_path=file_path):
         'You will be given a well test data, a summary of analysis from an anomaly detector agent and maybe some memory log/data from recents well tests.'
         "WTWCT: water Cut (%), BHP: Bottom Hole Pressure, WTTHP: Tubing Head Pressure, WTLIQ: Well Test Liquid, WTOil: Well Test Oil, Z1BHP: Zone 1 BHP, Z2BHP: Zone 2 BHP, Z3BHP: Zone 3 BHP\n"
         "you will have to interpret the data and give a generate your findings/interpretation as an experience Reservoir Engineer would. \n"
+        " Important tip: Optimizing a Zone (Zonal optimisation) usually does not results in significant increase in oil rate, but is aimed at reducing water cut and improving overall well performance.\n"
         "### Zonal Test Interpretation\n"
         "To conduct the zonal test interpretation, you will need to analyse the data past to you from the memory file and the anomaly detector agent. "
         "You will have to look into the BHPs of the zones, the oil and water rates, and the WCTs. over the last test indicated as zonal test in the memory data \n"
@@ -145,7 +147,7 @@ def make_prompt(threshold=0.1, file_path=file_path):
 
     MEMORY_SAVER_PROMPT = (
         'You will be given a well test data and a summary of analysis from an well test anomaly detector agent.'
-        'Your job is to look into the anomaly analysis and look to understand if a zonal test (considered an planned anomaly) is being mentioned.'
+        'Your job is to look into the anomaly analysis and look to understand if a zonal test or acid stimulation (considered an planned anomaly) is being mentioned.'
         'If yes, then you need to save the well test data in a memory file.'
         f'filepath: {file_path}'
     )

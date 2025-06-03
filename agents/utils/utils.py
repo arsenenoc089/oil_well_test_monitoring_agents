@@ -11,7 +11,7 @@ import streamlit as st
 #Load data function
 #####################################
 @st.cache_data()
-def load_transform_welltest_data(file_path, well_name='cheetah-20'):
+def load_transform_welltest_data(file_path, well_name='cheetah-20', threshold=0.1):
     """
     Load well test data from an excel sheet
     
@@ -61,12 +61,18 @@ def load_transform_welltest_data(file_path, well_name='cheetah-20'):
     df['log_diff_z1bhp_meanbhp'] = np.log(df['Z1BHP'] / df['mean_bhp'])
     df['log_diff_z2bhp_meanbhp'] = np.log(df['Z2BHP'] / df['mean_bhp'])
     df['log_diff_z3bhp_meanbhp'] = np.log(df['Z3BHP'] / df['mean_bhp'])
+    df['zone1_status'] = np.where(df['log_diff_z1bhp_meanbhp'] > threshold, 'Closed', 'Open')
+    df['zone2_status'] = np.where(df['log_diff_z2bhp_meanbhp'] > threshold, 'Closed', 'Open')
+    df['zone3_status'] = np.where(df['log_diff_z3bhp_meanbhp'] > threshold, 'Closed', 'Open')
 
     # Generate the log of changes of other well test parameters
     df['log_diff_oil'] = np.log(df['WTOil'] / df['WTOil'].shift(1))
     df['log_diff_liq'] = np.log(df['WTLIQ'] / df['WTLIQ'].shift(1))
     df['log_diff_thp'] = np.log(df['WTTHP'] / df['WTTHP'].shift(1))
     df['log_diff_wct'] = np.log(df['WTWCT'] / df['WTWCT'].shift(1))
+    df['log_diff_z3bhp'] = np.log(df['Z3BHP'] / df['Z3BHP'].shift(1))
+    df['log_diff_z2bhp'] = np.log(df['Z2BHP'] / df['Z2BHP'].shift(1))
+    df['log_diff_z1bhp'] = np.log(df['Z1BHP'] / df['Z1BHP'].shift(1))
     logger.info("Done generating mean BHP and log differences")
 
     #print(df.head(3))
