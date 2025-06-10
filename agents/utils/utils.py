@@ -31,10 +31,7 @@ def load_transform_welltest_data(file_path, well_name='cheetah-20', threshold=0.
         raise ValueError("The DataFrame does not contain a 'WellName' or 'Well Name' column.")
     #Select key columns
     df = df[['Date', 'Well Name', 'WT LIQ', 'WT Oil', 'WT THP', 'WT WCT', 'Z1 BHP',
-       'Z2 BHP', 'Z3 BHP', 'Delta Liquid', 'Delta Oil', 'Delta THP',
-       'Delta WCT', 'Delta Z1 BHP', 'Delta Z2 BHP', 'Delta Z3BHP',
-       'Decline Curve', 'Zonal Configuration', 'Engineer Interp',
-       'Engineer Action', 'Notification']].copy()
+       'Z2 BHP', 'Z3 BHP']].copy()
     
     #Rename columns
     df.rename(columns={'Well Name':'WellName',
@@ -45,21 +42,10 @@ def load_transform_welltest_data(file_path, well_name='cheetah-20', threshold=0.
                         'Z1 BHP':'Z1BHP',
                         'Z2 BHP':'Z2BHP',
                         'Z3 BHP':'Z3BHP',
-                        'Delta Liquid':'DeltaLiquid',
-                        'Delta Oil':'DeltaOil',
-                        'Delta THP':'DeltaTHP',
-                        'Delta WCT':'DeltaWCT',
-                        'Delta Z1 BHP':'DeltaZ1BHP',
-                        'Delta Z2 BHP':'DeltaZ2BHP',
-                        'Delta Z3 BHP':'DeltaZ3BHP',
-                        'Decline Curve':'DeclineCurve',
-                        'Zonal Configuration':'ZonalConfiguration',
-                        'Engineer Interp':'EngineerInterp',
-                        'Engineer Action':'EngineerAction',
-                        'Notification':'Notification'
                         }, inplace=True)
     
-    df.dropna(inplace = True)
+
+    #df.dropna(inplace = True)
     df['WTWCT'] = df['WTWCT']/ 100  # Convert WCT from percentage to decimal
 
     # Generate the log of changes
