@@ -21,6 +21,14 @@ def load_transform_welltest_data(file_path, well_name='cheetah-20', threshold=0.
     df = pd.read_excel(file_path, sheet_name=well_name)
     logger.info(f"Done loading data from {file_path} for well {well_name}")
 
+    if "WellName" in df.columns:
+        df.rename(columns={'WellName': 'Well Name'}, inplace=True)
+    elif "Well Name" in df.columns:
+        # If the column is already named 'Well Name', do nothing
+        pass
+    else:
+        logger.error("The DataFrame does not contain a 'WellName' or 'Well Name' column.")
+        raise ValueError("The DataFrame does not contain a 'WellName' or 'Well Name' column.")
     #Select key columns
     df = df[['Date', 'Well Name', 'WT LIQ', 'WT Oil', 'WT THP', 'WT WCT', 'Z1 BHP',
        'Z2 BHP', 'Z3 BHP', 'Delta Liquid', 'Delta Oil', 'Delta THP',
