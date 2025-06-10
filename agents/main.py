@@ -66,24 +66,26 @@ async def main():
     with st.sidebar:
         st.divider()
         st.markdown('Select a well below:')
-        chosen_well = ui.select(options=['cheetah-20', 'cheetah-90', 'cheetah-10'], key="well_select")
+        chosen_well = ui.select(options=['cheetah-90', 'cheetah-20', 'cheetah-10'], key="well_select")
+
+        if chosen_well:
+            logger.info("Starting to load data")
+            df_raw = utils.load_transform_welltest_data('data/RMO_Agentic AI_train_test.xlsx', well_name=chosen_well, threshold=0.1)
+            df = df_raw[['Date', 'WellName', 'WTLIQ', 'WTOil', 'WTTHP', 'WTWCT', 'Z1BHP',
+                    'Z2BHP', 'Z3BHP', 'mean_bhp', 'log_diff_oil',
+                    'log_diff_liq', 'log_diff_thp', 'log_diff_wct', 'log_diff_z1bhp',
+                    'log_diff_z2bhp', 'log_diff_z3bhp', 'zone1_status', 'zone2_status',
+                    'zone3_status']]
+        
+            df['Date'] = df['Date'].astype(str)
+            #Dates list
+            dates = df['Date'].unique().tolist()
+            dates.sort()
 
 
-        logger.info("Starting to load data")
-        df = utils.load_transform_welltest_data('data/RMO_Agentic AI_train_test.xlsx', well_name=chosen_well, threshold=0.1)
-        df = df[['Date', 'WellName', 'WTLIQ', 'WTOil', 'WTTHP', 'WTWCT', 'Z1BHP',
-                'Z2BHP', 'Z3BHP', 'mean_bhp', 'log_diff_oil',
-                'log_diff_liq', 'log_diff_thp', 'log_diff_wct', 'log_diff_z1bhp',
-                'log_diff_z2bhp', 'log_diff_z3bhp', 'zone1_status', 'zone2_status',
-                'zone3_status']].copy()
-    
-        df['Date'] = df['Date'].astype(str)
-        #Dates list
-        dates = df['Date'].unique().tolist()
-        dates.sort()
+        logger.info(f"Data loaded for well {chosen_well} with {len(df)} rows")
+        st.sidebar.success(f"Data loaded for well {chosen_well} with {len(df)} rows")
 
-    with st.sidebar:
-        st.divider()
         st.markdown('Select a well test date below:')
         selected_date = ui.select(options=dates)
 
