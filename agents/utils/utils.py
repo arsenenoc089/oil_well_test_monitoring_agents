@@ -11,7 +11,7 @@ import streamlit as st
 #Load data function
 #####################################
 @st.cache_data()
-def load_transform_welltest_data(file_path, well_name='cheetah-20'):
+def load_transform_welltest_data(file_path, well_name='cheetah-20', threshold=0.1):
     """
     Load well test data from an excel sheet
     
@@ -21,12 +21,17 @@ def load_transform_welltest_data(file_path, well_name='cheetah-20'):
     df = pd.read_excel(file_path, sheet_name=well_name)
     logger.info(f"Done loading data from {file_path} for well {well_name}")
 
+    if "WellName" in df.columns:
+        df.rename(columns={'WellName': 'Well Name'}, inplace=True)
+    elif "Well Name" in df.columns:
+        # If the column is already named 'Well Name', do nothing
+        pass
+    else:
+        logger.error("The DataFrame does not contain a 'WellName' or 'Well Name' column.")
+        raise ValueError("The DataFrame does not contain a 'WellName' or 'Well Name' column.")
     #Select key columns
     df = df[['Date', 'Well Name', 'WT LIQ', 'WT Oil', 'WT THP', 'WT WCT', 'Z1 BHP',
-       'Z2 BHP', 'Z3 BHP', 'Delta Liquid', 'Delta Oil', 'Delta THP',
-       'Delta WCT', 'Delta Z1 BHP', 'Delta Z2 BHP', 'Delta Z3BHP',
-       'Decline Curve', 'Zonal Configuration', 'Engineer Interp',
-       'Engineer Action', 'Notification']].copy()
+       'Z2 BHP', 'Z3 BHP']].copy()
     
     #Rename columns
     df.rename(columns={'Well Name':'WellName',
@@ -37,21 +42,11 @@ def load_transform_welltest_data(file_path, well_name='cheetah-20'):
                         'Z1 BHP':'Z1BHP',
                         'Z2 BHP':'Z2BHP',
                         'Z3 BHP':'Z3BHP',
-                        'Delta Liquid':'DeltaLiquid',
-                        'Delta Oil':'DeltaOil',
-                        'Delta THP':'DeltaTHP',
-                        'Delta WCT':'DeltaWCT',
-                        'Delta Z1 BHP':'DeltaZ1BHP',
-                        'Delta Z2 BHP':'DeltaZ2BHP',
-                        'Delta Z3 BHP':'DeltaZ3BHP',
-                        'Decline Curve':'DeclineCurve',
-                        'Zonal Configuration':'ZonalConfiguration',
-                        'Engineer Interp':'EngineerInterp',
-                        'Engineer Action':'EngineerAction',
-                        'Notification':'Notification'
                         }, inplace=True)
     
-    df.dropna(inplace = True)
+
+    #df.dropna(inplace = True)
+    df['WTWCT'] = df['WTWCT']/ 100  # Convert WCT from percentage to decimal
 
     # Generate the log of changes
     # Generate the mean value of the BHP across the zones
@@ -60,12 +55,18 @@ def load_transform_welltest_data(file_path, well_name='cheetah-20'):
     df['log_diff_z1bhp_meanbhp'] = np.log(df['Z1BHP'] / df['mean_bhp'])
     df['log_diff_z2bhp_meanbhp'] = np.log(df['Z2BHP'] / df['mean_bhp'])
     df['log_diff_z3bhp_meanbhp'] = np.log(df['Z3BHP'] / df['mean_bhp'])
+    df['zone1_status'] = np.where(df['log_diff_z1bhp_meanbhp'] > threshold, 'Closed', 'Open')
+    df['zone2_status'] = np.where(df['log_diff_z2bhp_meanbhp'] > threshold, 'Closed', 'Open')
+    df['zone3_status'] = np.where(df['log_diff_z3bhp_meanbhp'] > threshold, 'Closed', 'Open')
 
     # Generate the log of changes of other well test parameters
     df['log_diff_oil'] = np.log(df['WTOil'] / df['WTOil'].shift(1))
     df['log_diff_liq'] = np.log(df['WTLIQ'] / df['WTLIQ'].shift(1))
     df['log_diff_thp'] = np.log(df['WTTHP'] / df['WTTHP'].shift(1))
     df['log_diff_wct'] = np.log(df['WTWCT'] / df['WTWCT'].shift(1))
+    df['log_diff_z3bhp'] = np.log(df['Z3BHP'] / df['Z3BHP'].shift(1))
+    df['log_diff_z2bhp'] = np.log(df['Z2BHP'] / df['Z2BHP'].shift(1))
+    df['log_diff_z1bhp'] = np.log(df['Z1BHP'] / df['Z1BHP'].shift(1))
     logger.info("Done generating mean BHP and log differences")
 
     #print(df.head(3))
@@ -158,6 +159,63 @@ def fit_decline_curve(data, time_col, rate_col, auto = True, qi = None, Di = Non
     return qi, Di, q_fit
 
 #Clean the dataset by removing outliers in oil rate iteratively
+
+#Fit hyperbolic decline curve
+def fit_hyperbolic_decline_curve(data, time_col, rate_col, auto=True, qi=None, Di=None, b=None):
+    # Extract time and rate data
+
+    if len(data) >= 5:
+        #only use the top 5 rows for fitting
+        t = data[time_col].head(5)
+        q = data[rate_col].head(5)
+    elif len(data) < 3:
+        logger.error("Not enough data points to fit the hyperbolic decline curve. At least 3 data points are required.")
+        return None, None
+    else:
+        t = data[time_col]
+        q = data[rate_col]
+
+    # Define the hyperbolic decline function
+    def hyperbolic_decline(t, qi, b, Di):
+        return qi / ((1 + b * Di * t) ** (1 / b))
+    
+    #initialize parameters if not provided
+    qi_initial = 8000
+    b_initial = 0.5
+    Di_initial = 0.05
+
+    #bounds for the parameters
+    qi_max = 9000
+    b_max = 1
+    Di_max = 0.2
+    
+    # Fit the hyperbolic decline curve
+    popt, _ = curve_fit(hyperbolic_decline, t, q, 
+                        p0=[qi_initial, b_initial, Di_initial],
+                        bounds=(0, [qi_max, b_max, Di_max]),
+                        maxfev=100000)
+        
+    # Generate fitted values
+    q_fit = hyperbolic_decline(t, *popt)
+    
+    # Return fitted parameters and values
+    return q_fit, popt
+
+def dca_forecast(data, time_col, popt):
+    """
+    """
+    # Define the hyperbolic decline function
+    def hyperbolic_decline(t, qi, b, Di):
+        return qi / ((1 + b * Di * t) ** (1 / b))
+    # Generate forecasted values
+    data[time_col] = (data['Date'] - data['Date'].min()).dt.days  # Convert Date to days since the first date
+    t = data[time_col]
+    q_forecast = hyperbolic_decline(t, *popt)
+    data['dca_rate'] = q_forecast
+    return data
+
+
+
 
 def remove_outliers(df_subset, threshold=0.4):
     """

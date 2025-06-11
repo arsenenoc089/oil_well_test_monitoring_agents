@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Literal
 
 #Agents output types
 class WellTestContext(BaseModel):
@@ -12,13 +13,16 @@ class WellTestContext(BaseModel):
     Z2BHP: float
     Z3BHP: float
     mean_bhp: float
-    log_diff_z1bhp_meanbhp: float
-    log_diff_z2bhp_meanbhp: float
-    log_diff_z3bhp_meanbhp: float
+    zone1_status: Literal["Open", "Closed"]
+    zone2_status: Literal["Open", "Closed"]
+    zone3_status: Literal["Open", "Closed"]
     log_diff_oil: float
     log_diff_liq: float
     log_diff_thp: float
     log_diff_wct: float
+    log_diff_z1bhp: float
+    log_diff_z2bhp: float
+    log_diff_z3bhp: float
 
 class ZonalTestMemory(BaseModel):
     Date: str
@@ -29,9 +33,9 @@ class ZonalTestMemory(BaseModel):
     WTOil: float
     WTTHP: float
     WTWCT: float
-    Z1Status: str
-    Z2Status: str
-    Z3Status: str
+    Z1Status: Literal["Open", "Closed"]
+    Z2Status: Literal["Open", "Closed"]
+    Z3Status: Literal["Open", "Closed"]
     Z1BHP: float
     Z2BHP: float
     Z3BHP: float
