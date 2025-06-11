@@ -160,6 +160,63 @@ def fit_decline_curve(data, time_col, rate_col, auto = True, qi = None, Di = Non
 
 #Clean the dataset by removing outliers in oil rate iteratively
 
+#Fit hyperbolic decline curve
+def fit_hyperbolic_decline_curve(data, time_col, rate_col, auto=True, qi=None, Di=None, b=None):
+    # Extract time and rate data
+
+    if len(data) >= 5:
+        #only use the top 5 rows for fitting
+        t = data[time_col].head(5)
+        q = data[rate_col].head(5)
+    elif len(data) < 3:
+        logger.error("Not enough data points to fit the hyperbolic decline curve. At least 3 data points are required.")
+        return None, None
+    else:
+        t = data[time_col]
+        q = data[rate_col]
+
+    # Define the hyperbolic decline function
+    def hyperbolic_decline(t, qi, b, Di):
+        return qi / ((1 + b * Di * t) ** (1 / b))
+    
+    #initialize parameters if not provided
+    qi_initial = 8000
+    b_initial = 0.5
+    Di_initial = 0.05
+
+    #bounds for the parameters
+    qi_max = 9000
+    b_max = 1
+    Di_max = 0.2
+    
+    # Fit the hyperbolic decline curve
+    popt, _ = curve_fit(hyperbolic_decline, t, q, 
+                        p0=[qi_initial, b_initial, Di_initial],
+                        bounds=(0, [qi_max, b_max, Di_max]),
+                        maxfev=100000)
+        
+    # Generate fitted values
+    q_fit = hyperbolic_decline(t, *popt)
+    
+    # Return fitted parameters and values
+    return q_fit, popt
+
+def dca_forecast(data, time_col, popt):
+    """
+    """
+    # Define the hyperbolic decline function
+    def hyperbolic_decline(t, qi, b, Di):
+        return qi / ((1 + b * Di * t) ** (1 / b))
+    # Generate forecasted values
+    data[time_col] = (data['Date'] - data['Date'].min()).dt.days  # Convert Date to days since the first date
+    t = data[time_col]
+    q_forecast = hyperbolic_decline(t, *popt)
+    data['dca_rate'] = q_forecast
+    return data
+
+
+
+
 def remove_outliers(df_subset, threshold=0.4):
     """
     Remove outliers from the dataset based on the specified threshold.

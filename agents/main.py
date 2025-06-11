@@ -71,11 +71,15 @@ async def main():
         if chosen_well:
             logger.info("Starting to load data")
             df_raw = utils.load_transform_welltest_data('data/RMO_Agentic AI_train_test.xlsx', well_name=chosen_well, threshold=0.1)
+            #Compute the dca 
+            _ , popt = utils.fit_hyperbolic_decline_curve(df_raw, 'Date', 'WTOil')
+            df_raw = utils.dca_forecast(df_raw, 'Date', popt)
+            #Select key columns
             df = df_raw[['Date', 'WellName', 'WTLIQ', 'WTOil', 'WTTHP', 'WTWCT', 'Z1BHP',
                     'Z2BHP', 'Z3BHP', 'mean_bhp', 'log_diff_oil',
                     'log_diff_liq', 'log_diff_thp', 'log_diff_wct', 'log_diff_z1bhp',
                     'log_diff_z2bhp', 'log_diff_z3bhp', 'zone1_status', 'zone2_status',
-                    'zone3_status']]
+                    'zone3_status','dca_rate']]
         
             df['Date'] = df['Date'].astype(str)
             #Dates list
@@ -166,6 +170,7 @@ async def main():
 
     if agentic_ai_button:
         # Run the agents in a deterministic story flow
+        df.drop(['dca_rate'], axis=1, inplace=True)
         df = df.tail(1)
         df_iterator = df.iterrows()
         idx, serie = next(df_iterator)
